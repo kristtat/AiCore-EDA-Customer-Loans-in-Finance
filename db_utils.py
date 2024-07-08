@@ -45,7 +45,7 @@ class RDSDatabaseConnector:
         self.credentials = credentials
     
     @staticmethod
-    def _load_credentials():
+    def load_credentials():
         """
         Loads the credentials from 'credentials.yaml' file.
 
@@ -122,20 +122,3 @@ class RDSDatabaseConnector:
         df = pd.read_csv(filename)
         print(f"Loaded data from {filename} successfully!")
         return df
-
-
-def main():
-    """
-    Main function to load credentials, connect to the database, extract loan payments data, 
-    save the data to a CSV file, and then load the data from the CSV file.
-    """
-    credentials = RDSDatabaseConnector._load_credentials() 
-    connector = RDSDatabaseConnector(credentials)
-    connector.connect_to_database()
-    df = connector.extract_loan_payments()
-    connector.save_data(df, 'loan_payments_data.csv')
-    loaded_df = connector.load_data('loan_payments_data.csv')
-    print(loaded_df.head())
-
-if __name__ == "__main__":
-    main()
