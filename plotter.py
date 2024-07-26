@@ -18,8 +18,8 @@ class Plotter:
         plot_distribution(self, column):
             Generates a histogram of distribution of data in a column to inspect skewness. 
 
-        plot_boxplot(self, column):
-            Generates a boxplot of data in a column to inspect outliers.
+        plot_scatterplot(self, column):
+            Generates a scatterplot of data in a column to inspect outliers.
 
         plot_correlation_matrix(self):
             Generates a heatmap to visualise the correlation of data.
@@ -36,16 +36,15 @@ class Plotter:
 
         self.df = df
 
+    
     def plot_null_values(self):
 
         """
         Generates visualisations to show missing values in the DataFrame.
 
-        The method produces two plots:
+        Two plots:
         1. A heatmap illustrating the distribution of missing values across rows and columns.
         2. A vertical bar plot displaying the percentage of missing values for each column.
-
-        If there are no missing values in the DataFrame, a message is printed.
 
         """
          
@@ -89,10 +88,10 @@ class Plotter:
         plt.ylabel('Frequency')
         plt.show()
 
-    def plot_boxplot(self, column):
+    def plot_scatter_plot(self, column):
 
         """
-        Generates a boxplot to visualise the distribution of data in the specified column of the DataFrame to inspect outliers. 
+        Generates a scatter plot to visualise the distribution of data in the specified column of the DataFrame to inspect outliers. 
 
         Parameters:
             column (str): The name of the column for which the distribution is to be plotted.
@@ -100,10 +99,11 @@ class Plotter:
         """
 
         plt.figure(figsize=(16, 9))
-        sns.boxplot(x=self.df[column])
-        plt.title(f'Boxplot of {column}')
-        plt.xlabel(column)
-        plt.show() 
+        sns.scatterplot(x=self.df.index, y=self.df[column], alpha=0.5)
+        plt.title(f'Scatter Plot of {column}')
+        plt.xlabel('Index')
+        plt.ylabel(column)
+        plt.show()
 
     def plot_correlation_matrix(self):
 

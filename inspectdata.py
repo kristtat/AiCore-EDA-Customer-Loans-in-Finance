@@ -20,6 +20,9 @@ class DataFrameInfo:
 
         count_nulls(self):
             Counts null values in each column. 
+
+        percentage_of_zeros(self, column):
+            Calculates the percentage of zeros in the specified column.
     """
 
     def __init__(self, df):
@@ -56,9 +59,10 @@ class DataFrameInfo:
         stats = {}
         for col in self.df.select_dtypes(include='number').columns:
             stats[col] = {
-                'mean': self.df[col].mean(),
-                'median': self.df[col].median(),
-                'mode': self.df[col].mode()[0]
+                'mean': self.df[col].mean() if self.df[col].dtype in ['float64', 'int64'] else None,
+                'median': self.df[col].median() if self.df[col].dtype in ['float64', 'int64'] else None,
+                'mode': self.df[col].mode()[0] if not self.df[col].mode().empty else None,
+            
             }
         return stats
 
@@ -91,3 +95,25 @@ class DataFrameInfo:
         null_percentage = (null_counts / total_counts) * 100
         result = pd.DataFrame({'Null Count': null_counts, 'Null Percentage': null_percentage})
         return result
+
+    def percentage_of_zeros(self):
+        """
+        Calculates the percentage of zeros in the specified column.
+
+        Parameters:
+            column (str): The name of the column to calculate the percentage of zeros for.
+
+        Returns:
+            float: The percentage of zeros in the specified column.
+        """
+
+        for col in self.df.columns:
+            if pd.api.types.is_numeric_dtype(self.df[col]):
+                total_count = len(self.df[col])
+                if total_count == 0:
+                    zero_percentage = 0.0
+                else:
+                    zero_count = (self.df[col] == 0).sum()
+                    zero_percentage = (zero_count / total_count) * 100
+                
+                print(f"Percentage of zeros in column '{col}': {zero_percentage:.2f}%")

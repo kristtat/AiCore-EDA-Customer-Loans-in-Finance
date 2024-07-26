@@ -15,6 +15,9 @@ class DataFrameTransform:
         drop_nulls_over_threshold(self, threshold=50): 
             Drops columns with null value of over 50%.
 
+        drop_rows_in_datetime(self, column):
+            Drops rows with null values in a specific column in place.
+
         impute_missing_values(self):
             Imputes null values with mean or median if column numeric and with mode if column non-numeric.
 
@@ -31,7 +34,7 @@ class DataFrameTransform:
             Transforms skewed columns in the DataFrame using the best transformation method.
 
         remove_outliers(self, column):
-            Removes outliers from a specified column in the DataFrame using the Interquartile Range method.
+            Removes outliers from a specified column in the DataFrame using the interquartile range method. 
 
         identify_highly_correlated(self, threshold=0.9):
             Identifies pairs of numeric columns in the DataFrame that are highly correlated.
@@ -67,6 +70,18 @@ class DataFrameTransform:
         self.df.drop(columns=columns_to_drop, inplace=True)
         return self.df
 
+    def drop_rows_in_datetime(self, column):
+
+        """
+        Drops rows with null values in a specific column in place.
+
+        Parameters:
+            column (str): The name of the column to check for null values.
+        """
+
+        self.df.dropna(subset=[column], inplace=True)
+        print(f"Rows containing nulls dropped in {column}.")
+
     def impute_missing_values(self):
 
         """
@@ -78,17 +93,19 @@ class DataFrameTransform:
         """
 
         for col in self.df.columns:
-            if self.df[col].isnull().any():
-                if self.df[col].dtype in ['float64', 'int64']: #numeric columns, impute with mean or median
+           if self.df[col].isnull().any():
+                if self.df[col].dtype in ['float64', 'int64']:  #numeric columns, impute with mean or median
                     mean_value = self.df[col].mean()
                     median_value = self.df[col].median()
-                    if abs(mean_value - median_value) / mean_value < 0.1:  #checks that difference between mean and median is within 10% of mean
+                    if abs(mean_value - median_value) / mean_value < 0.1:  #check that the difference between mean and median is within 10% of mean
                         self.df[col] = self.df[col].fillna(mean_value)
                     else:
                         self.df[col] = self.df[col].fillna(median_value)
-                else:
-                    self.df[col] = self.df[col].fillna(self.df[col].mode()[0]) #non-numeric columns, impute with mode
+                else: 
+                    mode_value = self.df[col].mode() #non-numeric columns, impute with mode
+
         return self.df
+
 
     def identify_skewed_columns(self, skew_threshold=1):
 
@@ -99,11 +116,11 @@ class DataFrameTransform:
             skew_threshold (float): Threshold for skewness. Default is 1.
 
         Returns:
-            list: Column names with skewness < -skew_threshold or > skew_threshold.
+            list: Column names with skewness < skew_threshold or > skew_threshold.
         """
 
         skewed_columns = self.df.select_dtypes(include=['float64', 'int64']).apply(lambda x: x.skew())
-        skewed_columns = skewed_columns[(skewed_columns < -skew_threshold) | (skewed_columns > skew_threshold)] #both -1 and +1
+        skewed_columns = skewed_columns[(skewed_columns < skew_threshold) | (skewed_columns > skew_threshold)] #both -1 and +1
         return skewed_columns.index.tolist()
 
 
@@ -136,6 +153,7 @@ class DataFrameTransform:
             raise ValueError("Invalid transformation method")
 
     def find_best_transformation(self, col):
+
         """
         Finds the best transformation for a column by comparing skewness after applying a transformation.
 
@@ -189,14 +207,13 @@ class DataFrameTransform:
 
         """
 
-        Removes outliers from a specified column in the DataFrame using the Interquartile Range method.
+        Removes outliers from a specified column in the DataFrame using the interquartile range method.
 
         Parameters:
             column (str): The name of the numeric column from which outliers will be removed. 
 
         Returns:
             pandas.DataFrame: A new DataFrame with outliers removed from the specified column. 
-            The original DataFrame (`self.df`) is updated in place to exclude rows with outliers.
 
         """
 
@@ -246,7 +263,7 @@ class DataFrameTransform:
             threshold (float): Threshold above which columns considered highly correlated. Defaulted to 0.9.
 
         Returns:
-            tuple: A tuple containing:
+            tuple: 
                 pandas.DataFrame: The DataFrame with highly correlated columns removed.
                 set: A set of column names that were removed due to high correlation.
     
